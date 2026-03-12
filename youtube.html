@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Armor-Portfolio-System-v2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Armor-Portfolio-V2-Final</title>
 <style>
-/* [Rule 0] 스타일 격리 및 초기화 */
+/* [Rule 0] 스타일 격리 */
 :root {
     --main-color: #ffd64f;
     --tag-bg: rgba(73, 32, 0, 0.06);
@@ -19,57 +19,59 @@ body {
     background: transparent; overflow-x: hidden;
 }
 
-/* [Rule 1] Flex 강제 명시 및 [Rule 4] 텍스트 안정화 */
+/* [Rule 1] 카테고리 버튼 - 모바일 2줄(3열) 고정 */
 .nav-wrap {
     display: flex; align-items: center; justify-content: center; flex-direction: row;
-    gap: 12px; margin: 30px 0 20px; flex-wrap: wrap; padding: 0 10px;
+    gap: 8px; margin: 20px auto; flex-wrap: wrap; padding: 0 10px;
+    max-width: 650px;
 }
 
 .nav-wrap button {
     display: flex; align-items: center; justify-content: center;
-    padding: 10px 20px; border-radius: 8px; border: 0;
-    cursor: pointer; font-size: 16px; font-weight: 600;
+    flex: 1 1 calc(33.333% - 10px); /* 모바일 3열 기준 */
+    min-width: 90px; height: 46px; /* [Rule 5] 높이 고정 */
+    border-radius: 8px; border: 0;
+    cursor: pointer; font-size: 15px; font-weight: 600;
     background: #eeeeee; transition: all 0.25s ease;
-    line-height: 1.5; word-break: keep-all;
+    line-height: 1.2; word-break: keep-all;
 }
 
 .nav-wrap button[data-active="true"] {
     background: var(--main-color); color: #222;
-    transform: translateY(-4px); /* [Rule 8] 인터랙션 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 section[data-type] { display: none; width: 100%; max-width: 1180px; margin: 0 auto; }
 section[data-type][data-active="true"] { display: block; }
 
 .root-card {
-    all: initial; /* [Rule 0] 격리 */
-    box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex-direction: column;
+    all: initial; box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex-direction: column;
     background: #fff; border-radius: 16px; padding: 22px;
-    box-shadow: 0 8px 30px rgba(20,20,40,0.08); margin: 10px auto 36px;
-    font-family: inherit;
+    box-shadow: 0 8px 30px rgba(20,20,40,0.08); margin: 10px auto 40px;
+    font-family: inherit; width: 100%;
 }
 
-/* [Rule 6, 7] 세로 확장 방지 및 스테이지 설정 */
+/* [PC 디자인 복구] 스테이지 배경을 밝게 수정 */
 .stage {
-    position: relative; width: 100%; height: 560px; /* 고정 높이 복구 */
-    background: #eeeeee; border-radius: 12px; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; flex-direction: row;
+    position: relative; width: 100%; height: 560px;
+    background: #eeeeee; /* 검은색 제거, 기존의 연회색 복구 */
+    border-radius: 12px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
 }
 
 .slide {
     position: absolute; inset: 0; opacity: 0; pointer-events: none;
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.42s cubic-bezier(.2,.9,.3,1);
-    transform: translateX(10%);
+    transition: all 0.4s cubic-bezier(.2,.9,.3,1);
+    transform: translateX(30px);
 }
 .slide[data-active="true"] { opacity: 1; pointer-events: auto; transform: translateX(0); }
 
-/* 영상 크기 최적화 (너무 크지 않게 조절) */
+/* [PC 영상 크기] 기존처럼 80% 유지 + 깔끔한 그림자 */
 .slide iframe {
     width: 80%; max-width: 880px; aspect-ratio: 16 / 9;
     border: 0; border-radius: 8px; background: #000;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
 .arrow {
@@ -77,41 +79,45 @@ section[data-type][data-active="true"] { display: block; }
     width: 44px; height: 44px; border-radius: 50%; border: 0;
     background: rgba(255,255,255,0.95); cursor: pointer; z-index: 10;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1); transition: all 0.25s ease;
-    flex-shrink: 0; /* [Rule 2] 고정 크기 보호 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s;
 }
-.arrow:hover { transform: translateY(-50%) scale(1.1); background: #fff; }
-.arrow-prev { left: 14px; }
-.arrow-next { right: 14px; }
+.arrow:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+.arrow-prev { left: 15px; }
+.arrow-next { right: 15px; }
 
-/* [Rule 1, 4] 태그 중앙 정렬 해결 */
-.tag-container { margin-top: 24px; display: flex; justify-content: center; align-items: center; width: 100%; }
-.tag-group { display: none; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+/* [Rule 4] 태그 정렬 안정화 */
+.tag-container { margin-top: 24px; display: flex; justify-content: center; width: 100%; }
+.tag-group { display: none; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .tag-group[data-active="true"] { display: flex; }
-
 .tag-group span {
-    display: inline-flex; align-items: center; justify-content: center; /* 중앙 정렬 강제 */
+    display: inline-flex; align-items: center; justify-content: center;
     padding: 8px 18px; border-radius: 50px; background: var(--tag-bg);
     border: 1.5px solid var(--tag-border); color: var(--tag-text);
-    font-size: 14px; font-weight: 700; line-height: 1.5;
+    font-size: 14px; font-weight: 700; line-height: 1; /* 텍스트 수직 중앙 정렬 */
 }
 
 .thumbs-scroll {
     margin-top: 24px; display: flex; gap: 12px; overflow-x: auto; width: 100%;
-    padding: 10px 5px; scroll-behavior: smooth;
+    padding: 10px 5px 20px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
 }
 .thumb-btn {
     flex-shrink: 0; width: 180px; aspect-ratio: 16/9; border-radius: 8px;
-    border: 3px solid transparent; padding: 0; cursor: pointer;
-    overflow: hidden; transition: all 0.25s ease; background: #fff;
+    border: 3px solid transparent; padding: 0; cursor: pointer; overflow: hidden;
+    transition: all 0.25s ease;
 }
 .thumb-btn[data-active="true"] { border-color: var(--main-color); transform: translateY(-4px); }
 .thumb-btn img { width: 100%; height: 100%; object-fit: cover; }
 
-/* 모바일 최적화 */
+/* [모바일 최적화 미디어 쿼리] */
 @media (max-width: 768px) {
-    .stage { height: 320px; }
-    .slide iframe { width: 90%; }
+    .nav-wrap { gap: 6px; }
+    .nav-wrap button { font-size: 13px; flex: 1 1 calc(33.333% - 10px); height: 42px; }
+    
+    .root-card { padding: 15px 0; border-radius: 0; box-shadow: none; }
+    .stage { height: auto; aspect-ratio: 16 / 9; border-radius: 0; background: #000; } /* 모바일은 영상 몰입을 위해 블랙 */
+    .slide { transform: none; }
+    .slide iframe { width: 100%; max-width: none; border-radius: 0; box-shadow: none; }
+    .arrow { width: 34px; height: 34px; font-size: 12px; }
     .thumb-btn { width: 130px; }
 }
 </style>
@@ -122,7 +128,7 @@ section[data-type][data-active="true"] { display: block; }
 <div id="type-container"></div>
 
 <script>
-// [데이터 복구] 누락된 모든 영상 리스트 포함
+// [데이터 보존 규칙] 모든 영상 리스트 유지
 const videoData = {
     A: { title: "로블록스", list: [
         { id: "OrKo9rCpblo", tags: ["#프리미엄", "#로블록스", "#99 Nights"] },
@@ -227,7 +233,6 @@ const videoData = {
     ]},
 };
 
-// --- Slider Core Logic ---
 function initApp() {
     const btnWrap = document.getElementById('type-btns');
     const container = document.getElementById('type-container');
@@ -311,7 +316,6 @@ function setupSliderLogic(sec) {
     sec.querySelector('.arrow-next').onclick = () => update(current + 1);
     thumbs.forEach((t, i) => t.onclick = () => update(i));
     
-    // Initial Load
     const firstIfr = slides[0].querySelector('iframe');
     firstIfr.src = firstIfr.dataset.src;
 }
@@ -333,7 +337,7 @@ function sendHeight() {
     setTimeout(() => {
         const h = document.documentElement.scrollHeight;
         window.parent.postMessage({ type: 'resize', height: h }, '*');
-    }, 150);
+    }, 200);
 }
 
 window.onload = () => { initApp(); sendHeight(); };
