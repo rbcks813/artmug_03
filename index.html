@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 1. 폰트 로드 */
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2') format('woff2');
+            font-weight: 400; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
+            font-weight: 700; font-display: swap;
+        }
+        @font-face {
+            font-family: 'Paperozi';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2') format('woff2');
+            font-weight: 900; font-display: swap;
+        }
+
+        :root {
+            /* 상단 테마 컬러 */
+            --theme-title-bg: #FFD84F;     /* 제목 배경 */
+            --theme-brown: #4A3526;        /* 제목 텍스트 (갈색) */
+            
+            /* 하단 버튼 전용 컬러 (기존 유지) */
+            --btn-on-bg: #d9a52e;          /* 활성: 주황/골드 */
+            --btn-off-bg: #1a1a1a;         /* 활성: 블랙 */
+            --btn-inactive-bg: #f5f5f5;    /* 비활성 배경 */
+            --btn-inactive-border: #eee;   /* 비활성 테두리 */
+            --btn-inactive-text: #a3a3a3;  /* 비활성 텍스트 */
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background: transparent;
+            font-family: 'Paperozi', sans-serif;
+            display: flex; justify-content: center; align-items: flex-start;
+            overflow: hidden;
+        }
+
+        #am-root {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+            width: 100%;
+        }
+
+        /* [상단 바] */
+        .statusTitlePill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px 24px;
+            background: var(--theme-title-bg);
+            border-radius: 100px;
+            flex-shrink: 0;
+        }
+
+        .statusTitlePill .dot {
+            width: 8px; height: 8px;
+            background: #fff; border-radius: 50%;
+        }
+
+        .statusTitlePill .titleText {
+            font-size: 24px; font-weight: 900;
+            color: var(--theme-brown); line-height: 1;
+        }
+
+        /* [하단 영역] */
+        .statusOptions {
+            display: flex; 
+            gap: 10px; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* [버튼] Auto-fit 로직 적용 */
+        .statusOption {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 6px; 
+            height: 40px; 
+            padding: 0 16px; 
+            border-radius: 12px;
+            background: var(--btn-inactive-bg); 
+            border: 2px solid var(--btn-inactive-border);
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--btn-inactive-text);
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: default; 
+            white-space: nowrap;
+        }
+
+        /* 활성화 상태 */
+        .statusOption.activeOn {
+            background: var(--btn-on-bg) !important;
+            border-color: var(--btn-on-bg) !important;
+            color: #fff !important;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(217, 165, 46, 0.3);
+            padding: 0 20px;
+        }
+
+        .statusOption.activeOff {
+            background: var(--btn-off-bg) !important;
+            border-color: var(--btn-off-bg) !important;
+            color: #fff !important;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 0 20px;
+        }
+
+        /* 📞 전화기 아이콘 (따릉 애니메이션) */
+        .phone-icon-container {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 14px; height: 14px;
+        }
+        .activeOn .phone-icon-container { display: flex; }
+        .phone-icon {
+            width: 14px; height: 14px; fill: #fff;
+            animation: ring 0.6s infinite ease-in-out;
+        }
+
+        @keyframes ring {
+            0% { transform: rotate(0); }
+            15% { transform: rotate(-15deg); }
+            30% { transform: rotate(15deg); }
+            45% { transform: rotate(-10deg); }
+            60% { transform: rotate(10deg); }
+            100% { transform: rotate(0); }
+        }
+
+        /* 💤 Zzz 아이콘 */
+        .zzz-container {
+            display: none;
+            position: relative;
+            width: 14px; height: 14px;
+        }
+        .activeOff .zzz-container { display: flex; }
+        .zzz-container span {
+            position: absolute; font-size: 10px; font-weight: 900; color: #fff;
+            opacity: 0; animation: zzz 2s infinite;
+        }
+        .zzz-container span:nth-child(2) { animation-delay: 0.6s; left: 2px; }
+        .zzz-container span:nth-child(3) { animation-delay: 1.2s; left: 5px; }
+        
+        @keyframes zzz {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(6px, -12px); opacity: 0; }
+        }
+
+        .statusOption:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+<section id="am-root">
+    <div class="statusTitlePill">
+        <span class="dot"></span>
+        <span class="titleText">지금 연락 가능한가요?</span>
+        <span class="dot"></span>
+    </div>
+    
+    <div class="statusOptions">
+        <div id="statusOn" class="statusOption">
+            <div class="phone-icon-container">
+                <svg class="phone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 1.23 0 2.44.2 3.57.57.35.12.75.03 1.02-.24l2.2-2.2z"/>
+                </svg>
+            </div>
+            <span>실시간 연락 가능</span>
+        </div>
+        
+        <div id="statusOff" class="statusOption">
+            <div class="zzz-container">
+                <span>z</span><span>z</span><span>z</span>
+            </div>
+            <span>휴식 중</span>
+        </div>
+    </div>
+</section>
+
+<script>
+    // 🔗 사용자가 제공한 새로운 구글 시트 링크 (OPEN 시트 타겟팅)
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?output=csv&sheet=OPEN';
+
+    async function update() {
+        try {
+            // 캐시 방지를 위해 타임스탬프(&t=)를 붙여 실시간성 확보
+            const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
+            const text = await response.text();
+            
+            // CSV 첫 줄의 두 번째 값(B1) 추출
+            const rows = text.split('\n');
+            if (rows.length > 0) {
+                const cols = rows[0].split(',');
+                const statusValue = cols[1] ? cols[1].toUpperCase().trim() : "";
+
+                const onBtn = document.getElementById('statusOn');
+                const offBtn = document.getElementById('statusOff');
+
+                // B1의 값이 TRUE를 포함하는지 확인
+                if (statusValue.includes('TRUE')) {
+                    onBtn.classList.add('activeOn');
+                    offBtn.classList.remove('activeOff');
+                } else {
+                    offBtn.classList.add('activeOff');
+                    onBtn.classList.remove('activeOn');
+                }
+            }
+        } catch (e) {
+            console.warn('시트 동기화 대기 중...');
+        }
+    }
+
+    update();
+    setInterval(update, 15000); // 15초마다 자동 체크
+</script>
+
+</body>
+</html>
