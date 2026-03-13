@@ -33,13 +33,17 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* [수정] 모바일에서 가로 스크롤 방지 및 높이 감지 최적화 */
+        html { overflow: hidden; } 
         body {
             background: transparent;
             font-family: 'Cafe24Surround', sans-serif;
             color: var(--text-primary);
-            padding: 20px 10px;
+            padding: 15px 10px;
             line-height: 1.5;
             word-break: keep-all;
+            overflow-x: hidden;
         }
 
         .mainWrap { max-width: 845px; margin: 0 auto; }
@@ -117,6 +121,7 @@
         .calcBtn {
             border: none; border-radius: 14px; background: var(--brown-900); color: #fff;
             font-family: 'Cafe24Surround', sans-serif; font-size: 17px; cursor: pointer;
+            padding: 15px;
         }
 
         /* 문의 양식 */
@@ -138,9 +143,20 @@
 
         .notice { font-size: 12px; color: var(--text-secondary); margin-top: 10px; text-align: center; }
 
+        /* [수정] 모바일 최적화 미디어 쿼리 */
         @media (max-width: 768px) {
             .row, .formGrid, .bottomRow { grid-template-columns: 1fr; }
             .statusTitlePill { padding: 10px 20px; }
+            .unified-box { width: 100%; max-width: none; }
+            .pillField { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                height: auto; 
+                padding: 15px 20px; 
+                border-radius: 20px; 
+                gap: 10px;
+            }
+            .pillLabel { font-size: 15px; }
         }
     </style>
 </head>
@@ -227,12 +243,12 @@
                 <div class="formGrid">
                     <div class="formItem">
                         <label class="formLabel">유튜브 채널 링크</label>
-                        <div class="formHint">업로드될 유튜브 채널 링크를 작성해 주세요.<br>사용 음원 저작권 등록 및 채널 분위기 사전 확인을 위한 용도입니다.<br>예) https://youtube.com/...</div>
+                        <div class="formHint">업로드될 유튜브 채널 링크를 작성해 주세요.<br>사용 음원 저작권 등록 및 채널 분위기 사전 확인을 위한 용도입니다.</div>
                         <input class="formInput" id="fChannel" type="url" placeholder="링크를 작성해주세요.">
                     </div>
                     <div class="formItem">
                         <label class="formLabel">원본 영상 공유</label>
-                        <div class="formHint">보통 구글 드라이브 링크를 통한 공유를 추천드리며,<br>그 외에도 편하신 방법으로 공유해 주셔도 괜찮습니다.<br>(작업 확정 후 공유해 주셔도 무방합니다.)</div>
+                        <div class="formHint">구글 드라이브 링크를 통한 공유를 추천드리며,<br>작업 확정 후 공유해 주셔도 무방합니다.</div>
                         <input class="formInput" id="fFinalLen" type="text" placeholder="드라이브 링크 등을 작성해주세요.">
                     </div>
                     <div class="formItem formItem--full">
@@ -255,6 +271,12 @@
     </div>
 
     <script>
+        // [추가] 높이 조절 메시지 전송 함수
+        function sendHeight() {
+            const height = document.body.scrollHeight || document.documentElement.scrollHeight;
+            window.parent.postMessage({ height: height }, '*');
+        }
+
         const P1_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=483096933&single=true&output=csv";
         const P2_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=2058488740&single=true&output=csv";
         const P3_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=365920763&single=true&output=csv";
@@ -270,6 +292,7 @@
                 ]);
                 DB.p1 = parseCSV(r1); DB.p2 = parseCSV(r2); DB.p3 = parseCSV(r3);
                 renderRawOptions();
+                sendHeight(); // 로딩 완료 후 높이 체크
             } catch (e) { console.error("Data Load Error", e); }
         }
 
@@ -329,6 +352,7 @@
 
             total *= multipliers;
             document.getElementById('totalText').textContent = Math.round(total).toLocaleString() + "원";
+            sendHeight(); // 결과 출력 후 높이 체크
         }
 
         document.getElementById('calcBtn').addEventListener('click', calculate);
@@ -380,7 +404,13 @@
             document.getElementById('package').value = "premium";
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('is-active'));
             document.getElementById('totalText').textContent = "0원";
+            sendHeight(); // 리셋 후 높이 체크
         });
+
+        // 윈도우 크기가 변할 때마다 부모에게 알림
+        window.addEventListener('resize', sendHeight);
+        // 주기적으로 체크 (실시간 대응)
+        setInterval(sendHeight, 1000);
 
         loadData();
     </script>
