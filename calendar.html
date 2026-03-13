@@ -5,13 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>현서이님-작업 캘린더</title>
     <style>
-        /* [1. 임베드 최적화 리셋] */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: auto;
-            background-color: transparent; /* 배경을 투명하게 하여 부모 페이지와 조화 */
+        /* [1. 중앙 정렬을 위한 최상위 초기화] */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex; /* 자식을 중앙으로 보내기 위한 설정 */
+            justify-content: center; /* 가로 중앙 */
+            align-items: flex-start; /* 세로는 상단부터 */
+            background-color: #fdfdfd;
             font-family: 'Pretendard', sans-serif;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overflow-x: hidden;
+            -webkit-text-size-adjust: none;
+        }
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* [폰트 설정] */
@@ -33,77 +44,88 @@
             --holiday-bg: #ffdfdf; --holiday-text: #d32f2f; --holiday-border: #f44336;
         }
 
-        /* [2. 전체 레이아웃 중앙 정렬] */
+        /* [2. 메인 컨테이너 - 좌우 대칭 보장] */
         .calendarSection { 
-            width: 100%; max-width: 900px; margin: 0 auto; 
-            padding: 10px; /* 모바일에서 좌우 짤림 방지용 최소 여백 */
-            display: flex; flex-direction: column; align-items: center;
-        }
+            width: 100%; 
+            max-width: 900px; /* PC 최대 폭 */
+            padding: 30px 15px; /* 내부 안전 여백 */
+            margin: 0 auto; /* 수평 중앙 정렬 보조 */
+        } 
         
-        /* 상단 타이틀 바 최적화 */
-        .statusHeader { width: 100%; display: flex; justify-content: center; padding-bottom: 15px; }
+        /* 제목 부분 중앙 정렬 */
+        .statusHeader { 
+            width: 100%;
+            display: flex; 
+            justify-content: center; 
+            margin-bottom: 20px;
+        }
         .statusTitlePill {
-            display: inline-flex; align-items: center; gap: 10px;
-            min-height: 46px; padding: 0 20px; border-radius: 999px; background: #ffd84f;
-            color: #2f231d; font-family: 'Paperozi', sans-serif; font-size: 22px; font-weight: 700;
-            box-shadow: 0 4px 10px rgba(255, 214, 79, 0.25);
-            white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            min-height: 52px; padding: 0 25px; border-radius: 999px; background: #ffd84f;
+            color: #2f231d; font-family: 'Paperozi', sans-serif; font-size: 24px; font-weight: 700;
+            box-shadow: 0 6px 15px rgba(255, 214, 79, 0.25);
         }
-        .statusTitlePill .dot { width: 8px; height: 8px; border-radius: 50%; background: #fffdf6; }
+        .statusTitlePill .dot { width: 9px; height: 9px; border-radius: 50%; background: #fffdf6; flex-shrink: 0; }
 
-        /* 달력 메인 박스 */
+        /* [3. 캘린더 본체 - 가로 100% 사용] */
         .scalendar {
-            width: 100%; padding: 15px; border-radius: 20px; background: var(--bg);
-            box-shadow: inset 0 0 0 4px #ffd95e, inset 0 0 0 6px #f1b300, 0 10px 20px rgba(255, 214, 79, 0.15);
+            width: 100%; 
+            padding: 20px; 
+            border-radius: 24px; 
+            background: var(--bg);
+            box-shadow: inset 0 0 0 4px #ffd95e, inset 0 0 0 6px #f1b300, 0 12px 25px rgba(255, 214, 79, 0.15);
         }
         
-        .scalendar__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .scalendar__tabs { display: flex; gap: 6px; }
+        .scalendar__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .scalendar__tabs { display: flex; gap: 8px; }
         .scalendar__tab { 
-            padding: 6px 14px; border-radius: 999px; border: 1px solid #ebc75c; 
-            background: #fff6d8; cursor: pointer; font-weight: 800; font-size: 13px; color: var(--text-strong);
+            padding: 8px 16px; border-radius: 999px; border: 1px solid #ebc75c; 
+            background: #fff6d8; cursor: pointer; font-weight: 800; font-size: 14px; color: var(--text-strong);
         }
         .scalendar__tab.is-active { background: #ffd84f; border-color: #e2ae28; }
-        .scalendar__title { font-size: 19px; font-weight: 800; color: var(--text-strong); font-family: 'Paperozi'; }
+        .scalendar__title { font-size: 22px; font-weight: 800; color: var(--text-strong); font-family: 'Paperozi'; }
 
-        /* [3. 그리드 최적화 - 짤림 방지] */
-        .scalendar__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px; text-align: center; font-weight: 800; color: var(--text-soft); font-size: 12px; }
-        .scalendar__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; }
+        .scalendar__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px; text-align: center; font-weight: 800; color: var(--text-soft); font-size: 13px; }
+        .scalendar__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; }
         
-        /* 셀 디자인 (세로 높이 더 줄임) */
         .scalendar__cell { 
-            min-height: 48px; padding: 6px; border-radius: 12px; border: 1px solid #f4d879; 
-            background: var(--cell); display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+            min-width: 0; /* 강제 축소 허용 */
+            min-height: 50px; padding: 8px; border-radius: 14px; border: 1px solid #f4d879; 
+            background: var(--cell); display: flex; flex-direction: row; align-items: center; justify-content: space-between; position: relative;
         }
         .scalendar__cell.is-outside { background: var(--cell-outside); opacity: 0.4; }
         .scalendar__cell.is-today { border: 2px solid var(--today-line); background: var(--today-bg); }
         .scalendar__cell.is-closed { background: #fff0ba; }
         .scalendar__cell.is-holiday { background: #ffeaea; }
 
-        .scalendar__date { font-size: 13px; font-weight: 800; }
+        .scalendar__date { font-size: 14px; font-weight: 800; flex-shrink: 0; }
         .is-sun { color: #ee8a6d; }
 
         .scalendar__badge { 
-            padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: 800; white-space: nowrap;
+            padding: 3px 6px; border-radius: 6px; font-size: 11px; font-weight: 800; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 65%; /* 배지가 날짜를 밀어내지 않게 제한 */
+            text-align: center;
         }
         .scalendar__badge.closed { background: var(--closed-bg); color: var(--closed-text); border: 1px solid var(--closed-border); }
         .scalendar__badge.holiday { background: var(--holiday-bg); color: var(--holiday-text); border: 1px solid var(--holiday-border); }
         
-        .scalendar__footer { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #efd36a; font-size: 13px; text-align: center; color: var(--text-soft); }
+        .scalendar__footer { margin-top: 20px; padding-top: 12px; border-top: 1px dashed #efd36a; font-size: 14px; text-align: center; color: var(--text-soft); width: 100%; }
 
-        /* [4. 모바일 전용 극단적 최적화] */
-        @media screen and (max-width: 480px) {
-            .calendarSection { padding: 5px; } /* 외부 여백 최소화 */
-            .scalendar { padding: 10px; border-radius: 16px; }
+        /* [4. 모바일 최적화 및 중앙 유지] */
+        @media screen and (max-width: 600px) {
+            .calendarSection { padding: 15px 8px; }
+            .scalendar { padding: 12px; border-radius: 18px; }
+            .scalendar__grid { gap: 4px; }
             .scalendar__cell { 
-                min-height: 42px; padding: 4px; 
-                flex-direction: column; align-items: center; justify-content: center; /* 모바일은 좁으므로 위아래 배치 */
+                min-height: 45px; padding: 6px 4px; flex-direction: column; 
+                align-items: center; justify-content: center; gap: 4px;
             }
-            .scalendar__date { font-size: 11px; margin-bottom: 2px; }
-            .scalendar__badge { font-size: 8px; padding: 1px 3px; width: 100%; text-align: center; }
-            .statusTitlePill { font-size: 17px; min-height: 38px; padding: 0 15px; }
-            .scalendar__title { font-size: 16px; }
-            .scalendar__tab { padding: 5px 10px; font-size: 11px; }
+            .scalendar__date { font-size: 12px; }
+            .scalendar__badge { font-size: 9px; max-width: 100%; width: 100%; }
+            .statusTitlePill { font-size: 18px; min-height: 42px; padding: 0 15px; }
+            .scalendar__title { font-size: 18px; }
+            .scalendar__tab { padding: 6px 10px; font-size: 11px; }
         }
     </style>
 </head>
@@ -133,7 +155,10 @@
                 if (!dateStr) return "";
                 const parts = dateStr.replace(/[^0-9]/g, '-').split('-').filter(p => p !== "");
                 if (parts.length < 3) return "";
-                return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                const y = parts[0];
+                const m = parts[1].padStart(2, '0');
+                const d = parts[2].padStart(2, '0');
+                return `${y}-${m}-${d}`;
             }
 
             function parseCSV(text) {
@@ -169,8 +194,11 @@
 
                     const baseMonth = settings.active_month || new Date().toISOString().slice(0, 7);
                     const [startY, startM] = baseMonth.split('-').map(Number);
+                    
                     const months = [];
-                    for(let i=0; i<CONFIG.monthTabCount; i++) months.push(new Date(startY, startM - 1 + i, 1));
+                    for(let i=0; i<CONFIG.monthTabCount; i++) {
+                        months.push(new Date(startY, startM - 1 + i, 1));
+                    }
 
                     function render(idx) {
                         const target = months[idx];
@@ -191,36 +219,46 @@
                             <div class="scalendar__grid">`;
 
                         const firstDay = new Date(year, month, 1);
-                        const startDayOfWeek = firstDay.getDay();
-                        const totalDays = new Date(year, month + 1, 0).getDate();
-                        const rowsNeeded = Math.ceil((startDayOfWeek + totalDays) / 7);
+                        const lastDay = new Date(year, month + 1, 0);
+                        const startDayOfWeek = firstDay.getDay(); 
+                        const totalDaysInMonth = lastDay.getDate(); 
+                        const rowsNeeded = Math.ceil((startDayOfWeek + totalDaysInMonth) / 7);
+                        const loopCount = rowsNeeded * 7; 
+
                         const start = new Date(firstDay);
                         start.setDate(firstDay.getDate() - startDayOfWeek);
 
-                        for (let i = 0; i < rowsNeeded * 7; i++) {
+                        for (let i = 0; i < loopCount; i++) {
                             const d = new Date(start);
                             d.setDate(start.getDate() + i);
                             const dateKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                             const status = dateMap.get(dateKey) || "";
+                            
                             const isOutside = d.getMonth() !== month ? 'is-outside' : '';
                             const isToday = dateKey === new Date().toISOString().slice(0, 10) ? 'is-today' : '';
                             
-                            let stateClass = ""; let badgeClass = "";
+                            let stateClass = "";
+                            let badgeClass = "";
                             if (status.includes("마감")) { stateClass = "is-closed"; badgeClass = "closed"; }
                             else if (status.includes("휴무")) { stateClass = "is-holiday"; badgeClass = "holiday"; }
 
                             html += `
                             <div class="scalendar__cell ${isOutside} ${isToday} ${stateClass}">
                                 <span class="scalendar__date ${d.getDay()===0?'is-sun':''}">${d.getDate()}</span>
-                                ${status ? `<div class="scalendar__badge ${badgeClass}">${status}</div>` : ''}
+                                ${status ? `<div class="scalendar__badge ${badgeClass}" title="${status}">${status}</div>` : ''}
                             </div>`;
                         }
+
                         html += `</div><div class="scalendar__footer">${settings.available_text || ""}</div></div>`;
                         mount.innerHTML = html;
                     }
+
                     window._renderCal = render;
                     render(0);
-                } catch (e) { mount.innerHTML = "데이터 로딩 오류"; }
+
+                } catch (e) {
+                    mount.innerHTML = "데이터 로딩 오류";
+                }
             }
             init();
         })();
