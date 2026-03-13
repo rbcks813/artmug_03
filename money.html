@@ -34,7 +34,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: var(--bg-page);
+            background: transparent;
             font-family: 'Cafe24Surround', sans-serif;
             color: var(--text-primary);
             padding: 20px 10px;
@@ -255,7 +255,6 @@
     </div>
 
     <script>
-        /* --- 데이터 시트 연동 (P1~P3) --- */
         const P1_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=483096933&single=true&output=csv";
         const P2_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=2058488740&single=true&output=csv";
         const P3_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=365920763&single=true&output=csv";
@@ -313,17 +312,14 @@
 
             let total = basePrice + (minPrice * finalMin);
 
-            // 시점 추가 (P3 기준)
             const momentDef = DB.p3.find(d => d.label === '시점 추가');
             total += (momentCnt * (parseInt(momentDef?.value) || 30000));
 
-            // 합방 인원 추가 (P3 기준)
             const collabDef = DB.p3.find(d => d.label === '합방 인원 추가');
             if (collabCnt >= 4) {
                 total += (finalMin * (parseInt(collabDef?.value) || 2000) * (collabCnt - 3));
             }
 
-            // 추가 옵션 배율 (P3 기준)
             let multipliers = 1;
             const activeChips = document.querySelectorAll('#extraToggles .chip.is-active');
             activeChips.forEach(chip => {
@@ -335,7 +331,6 @@
             document.getElementById('totalText').textContent = Math.round(total).toLocaleString() + "원";
         }
 
-        /* --- UI 제어 --- */
         document.getElementById('calcBtn').addEventListener('click', calculate);
 
         document.getElementById('extraToggles').addEventListener('click', (e) => {
