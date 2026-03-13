@@ -16,20 +16,24 @@
 body {
     margin: 0; padding: 0;
     font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
-    background: transparent; overflow-x: hidden;
+    background: transparent; 
+    overflow-x: hidden;
+    /* 하단 빈공간 방지를 위해 높이를 유연하게 설정 */
+    height: auto;
+    min-height: auto;
 }
 
 /* [Rule 1] 카테고리 버튼 - 모바일 2줄(3열) 고정 */
 .nav-wrap {
     display: flex; align-items: center; justify-content: center; flex-direction: row;
-    gap: 8px; margin: 20px auto; flex-wrap: wrap; padding: 0 10px;
+    gap: 8px; margin: 15px auto; flex-wrap: wrap; padding: 0 10px;
     max-width: 650px;
 }
 
 .nav-wrap button {
     display: flex; align-items: center; justify-content: center;
     flex: 1 1 calc(33.333% - 10px); /* 모바일 3열 기준 */
-    min-width: 90px; height: 46px; /* [Rule 5] 높이 고정 */
+    min-width: 90px; height: 46px; 
     border-radius: 8px; border: 0;
     cursor: pointer; font-size: 15px; font-weight: 600;
     background: #eeeeee; transition: all 0.25s ease;
@@ -47,14 +51,16 @@ section[data-type][data-active="true"] { display: block; }
 .root-card {
     all: initial; box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex-direction: column;
     background: #fff; border-radius: 16px; padding: 22px;
-    box-shadow: 0 8px 30px rgba(20,20,40,0.08); margin: 10px auto 40px;
+    box-shadow: 0 8px 30px rgba(20,20,40,0.08); 
+    /* 중요: 하단 마진을 0으로 변경하여 밀어냄 방지 */
+    margin: 10px auto 0px; 
     font-family: inherit; width: 100%;
 }
 
 /* [PC 디자인 복구] 스테이지 배경을 밝게 수정 */
 .stage {
     position: relative; width: 100%; height: 560px;
-    background: #eeeeee; /* 검은색 제거, 기존의 연회색 복구 */
+    background: #eeeeee; 
     border-radius: 12px; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
 }
@@ -67,7 +73,7 @@ section[data-type][data-active="true"] { display: block; }
 }
 .slide[data-active="true"] { opacity: 1; pointer-events: auto; transform: translateX(0); }
 
-/* [PC 영상 크기] 기존처럼 80% 유지 + 깔끔한 그림자 */
+/* [PC 영상 크기] 80% 유지 */
 .slide iframe {
     width: 80%; max-width: 880px; aspect-ratio: 16 / 9;
     border: 0; border-radius: 8px; background: #000;
@@ -85,7 +91,7 @@ section[data-type][data-active="true"] { display: block; }
 .arrow-prev { left: 15px; }
 .arrow-next { right: 15px; }
 
-/* [Rule 4] 태그 정렬 안정화 */
+/* 태그 정렬 */
 .tag-container { margin-top: 24px; display: flex; justify-content: center; width: 100%; }
 .tag-group { display: none; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .tag-group[data-active="true"] { display: flex; }
@@ -93,7 +99,7 @@ section[data-type][data-active="true"] { display: block; }
     display: inline-flex; align-items: center; justify-content: center;
     padding: 8px 18px; border-radius: 50px; background: var(--tag-bg);
     border: 1.5px solid var(--tag-border); color: var(--tag-text);
-    font-size: 14px; font-weight: 700; line-height: 1; /* 텍스트 수직 중앙 정렬 */
+    font-size: 14px; font-weight: 700; line-height: 1;
 }
 
 .thumbs-scroll {
@@ -110,15 +116,16 @@ section[data-type][data-active="true"] { display: block; }
 
 /* [모바일 최적화 미디어 쿼리] */
 @media (max-width: 768px) {
-    .nav-wrap { gap: 6px; }
+    .nav-wrap { gap: 6px; margin: 10px auto; }
     .nav-wrap button { font-size: 13px; flex: 1 1 calc(33.333% - 10px); height: 42px; }
     
-    .root-card { padding: 15px 0; border-radius: 0; box-shadow: none; }
-    .stage { height: auto; aspect-ratio: 16 / 9; border-radius: 0; background: #000; } /* 모바일은 영상 몰입을 위해 블랙 */
+    .root-card { padding: 15px 0; border-radius: 0; box-shadow: none; margin-top: 5px; }
+    .stage { height: auto; aspect-ratio: 16 / 9; border-radius: 0; background: #000; }
     .slide { transform: none; }
     .slide iframe { width: 100%; max-width: none; border-radius: 0; box-shadow: none; }
     .arrow { width: 34px; height: 34px; font-size: 12px; }
-    .thumb-btn { width: 130px; }
+    .thumb-btn { width: 120px; }
+    .thumbs-scroll { margin-top: 15px; padding-bottom: 10px; }
 }
 </style>
 </head>
@@ -128,7 +135,6 @@ section[data-type][data-active="true"] { display: block; }
 <div id="type-container"></div>
 
 <script>
-// [데이터 보존 규칙] 모든 영상 리스트 유지
 const videoData = {
     A: { title: "로블록스", list: [
         { id: "OrKo9rCpblo", tags: ["#프리미엄", "#로블록스", "#99 Nights"] },
@@ -253,6 +259,12 @@ function initApp() {
         container.appendChild(sec);
         setupSliderLogic(sec);
     });
+
+    // 실시간 높이 감지: ResizeObserver 사용
+    const ro = new ResizeObserver(() => {
+        sendHeight();
+    });
+    ro.observe(document.body);
 }
 
 function renderSlider(list, typeKey) {
@@ -334,14 +346,12 @@ function switchCategory(key) {
 }
 
 function sendHeight() {
-    setTimeout(() => {
-        const h = document.documentElement.scrollHeight;
-        window.parent.postMessage({ type: 'resize', height: h }, '*');
-    }, 200);
+    // scrollHeight 대신 offsetHeight를 사용하여 실제 렌더링된 높이 측정
+    const h = document.body.offsetHeight;
+    window.parent.postMessage({ type: 'resize', height: h }, '*');
 }
 
 window.onload = () => { initApp(); sendHeight(); };
-window.onresize = sendHeight;
 </script>
 </body>
 </html>
