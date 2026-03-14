@@ -32,29 +32,27 @@
             --unified-width: 140px;
         }
 
-        /* [핵심 수정] 모든 스크롤 잠금 요소 해제 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        html { 
-            /* 스크롤 가두기 방지: 높이를 고정하지 않고 넘침을 허용함 */
+        /* [꼼수 1] 배경 투과 설정 */
+        html, body { 
             overflow: visible !important; 
-            height: auto !important; 
-        } 
-        body {
-            background: transparent;
-            font-family: 'Cafe24Surround', sans-serif;
-            color: var(--text-primary);
-            padding: 15px 10px;
-            line-height: 1.5;
-            word-break: keep-all;
-            /* 모바일에서 스크롤 주도권을 부모 페이지에 즉시 넘기도록 설정 */
-            overflow: visible !important;
             height: auto !important;
-            touch-action: auto !important; 
-            -webkit-overflow-scrolling: touch;
+            background: transparent;
+            /* 배경은 터치를 무시하고 부모 페이지로 전달 */
+            pointer-events: none; 
+        } 
+
+        /* 실제 계산기 영역만 터치를 다시 활성화 */
+        .mainWrap { 
+            max-width: 845px; 
+            margin: 0 auto; 
+            padding: 15px 10px;
+            pointer-events: auto; 
+            /* 가속도 스크롤 및 터치 최적화 */
+            touch-action: manipulation; 
         }
 
-        .mainWrap { max-width: 845px; margin: 0 auto; position: relative; }
         .sec { margin-bottom: 50px; width: 100%; }
 
         .statusTitlePill {
@@ -161,6 +159,8 @@
 </head>
 
 <body>
+    <div id="heartbeat" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0.01; pointer-events:none;"></div>
+
     <div class="mainWrap">
         <section class="sec" id="calc">
             <div class="statusTitlePill">
@@ -262,10 +262,21 @@
     </div>
 
     <script>
-        // 높이 전송 (부모에서 아이프레임 길이를 맞추기 위해 필수)
         function sendHeight() {
             const height = document.body.offsetHeight || document.body.scrollHeight;
             window.parent.postMessage({ height: height }, '*');
+        }
+
+        // [꼼수 2] 1.5초마다 미세한 변화를 주어 브라우저의 스크롤 고정 알고리즘을 방해함
+        function startHeartbeat() {
+            const hb = document.getElementById('heartbeat');
+            let toggle = true;
+            setInterval(() => {
+                hb.style.transform = toggle ? 'translateX(0.1px)' : 'translateX(0)';
+                toggle = !toggle;
+                // 높이도 다시 한번 체크해서 부모에게 보냄
+                sendHeight();
+            }, 1500);
         }
 
         const P1_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=483096933&single=true&output=csv";
@@ -284,6 +295,7 @@
                 DB.p1 = parseCSV(r1); DB.p2 = parseCSV(r2); DB.p3 = parseCSV(r3);
                 renderRawOptions();
                 sendHeight();
+                startHeartbeat(); // 하트비트 시작
             } catch (e) { console.error("Data Load Error", e); }
         }
 
@@ -350,7 +362,6 @@
             }
         });
 
-        // 복사 로직 (스크롤 튕김 방지 유지)
         document.getElementById('btnCopyForm').addEventListener('click', (e) => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
@@ -406,7 +417,6 @@
         });
 
         window.addEventListener('resize', sendHeight);
-        setInterval(sendHeight, 1000);
         loadData();
     </script>
 </body>
