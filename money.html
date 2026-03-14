@@ -34,7 +34,11 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        html { overflow: hidden; } 
+        /* [중요 수정] 스크롤 가두기 방지 */
+        html { 
+            overflow: visible; /* hidden 제거: 부모 페이지 스크롤 허용 */
+            height: auto; 
+        } 
         body {
             background: transparent;
             font-family: 'Cafe24Surround', sans-serif;
@@ -42,7 +46,10 @@
             padding: 15px 10px;
             line-height: 1.5;
             word-break: keep-all;
-            overflow-x: hidden;
+            overflow: visible;
+            /* 모바일에서 수직 스크롤(pan-y)을 부모에게 즉시 전달하도록 설정 */
+            touch-action: pan-y; 
+            -webkit-overflow-scrolling: touch;
         }
 
         .mainWrap { max-width: 845px; margin: 0 auto; }
@@ -353,7 +360,6 @@
             }
         });
 
-        // [수정된 복사 로직] 화면 튕김(스크롤 점프) 방지 적용
         document.getElementById('btnCopyForm').addEventListener('click', (e) => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
@@ -378,19 +384,13 @@
 
 - 예상 총액: ${document.getElementById('totalText').textContent}`;
 
-            // --- 스크롤 방지 복사 처리 ---
             const textArea = document.createElement("textarea");
             textArea.value = copyTemplate;
-            
-            // 현재 스크롤 위치를 구해서 해당 위치에 textarea를 생성 (위로 튕기는 것 방지)
             const yPos = window.pageYOffset || document.documentElement.scrollTop;
             textArea.style.position = "absolute";
             textArea.style.left = "-9999px";
             textArea.style.top = yPos + "px"; 
-            
             document.body.appendChild(textArea);
-            
-            // 포커스를 주되, 스크롤이 이동하지 않도록 옵션 추가
             textArea.focus({ preventScroll: true });
             textArea.select();
             textArea.setSelectionRange(0, 99999);
