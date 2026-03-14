@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>현서이님-견적 계산기</title>
 
     <style>
@@ -34,25 +34,18 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* [꼼수 1] 배경 투과 설정 */
-        html, body { 
-            overflow: visible !important; 
-            height: auto !important;
+        html { overflow: hidden; } 
+        body {
             background: transparent;
-            /* 배경은 터치를 무시하고 부모 페이지로 전달 */
-            pointer-events: none; 
-        } 
-
-        /* 실제 계산기 영역만 터치를 다시 활성화 */
-        .mainWrap { 
-            max-width: 845px; 
-            margin: 0 auto; 
+            font-family: 'Cafe24Surround', sans-serif;
+            color: var(--text-primary);
             padding: 15px 10px;
-            pointer-events: auto; 
-            /* 가속도 스크롤 및 터치 최적화 */
-            touch-action: manipulation; 
+            line-height: 1.5;
+            word-break: keep-all;
+            overflow-x: hidden;
         }
 
+        .mainWrap { max-width: 845px; margin: 0 auto; }
         .sec { margin-bottom: 50px; width: 100%; }
 
         .statusTitlePill {
@@ -159,8 +152,6 @@
 </head>
 
 <body>
-    <div id="heartbeat" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0.01; pointer-events:none;"></div>
-
     <div class="mainWrap">
         <section class="sec" id="calc">
             <div class="statusTitlePill">
@@ -263,20 +254,8 @@
 
     <script>
         function sendHeight() {
-            const height = document.body.offsetHeight || document.body.scrollHeight;
+            const height = document.body.scrollHeight || document.documentElement.scrollHeight;
             window.parent.postMessage({ height: height }, '*');
-        }
-
-        // [꼼수 2] 1.5초마다 미세한 변화를 주어 브라우저의 스크롤 고정 알고리즘을 방해함
-        function startHeartbeat() {
-            const hb = document.getElementById('heartbeat');
-            let toggle = true;
-            setInterval(() => {
-                hb.style.transform = toggle ? 'translateX(0.1px)' : 'translateX(0)';
-                toggle = !toggle;
-                // 높이도 다시 한번 체크해서 부모에게 보냄
-                sendHeight();
-            }, 1500);
         }
 
         const P1_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=483096933&single=true&output=csv";
@@ -295,7 +274,6 @@
                 DB.p1 = parseCSV(r1); DB.p2 = parseCSV(r2); DB.p3 = parseCSV(r3);
                 renderRawOptions();
                 sendHeight();
-                startHeartbeat(); // 하트비트 시작
             } catch (e) { console.error("Data Load Error", e); }
         }
 
@@ -327,22 +305,32 @@
             const collabCnt = parseInt(document.getElementById('collabVal').value) || 0;
 
             if (!rawKey) { alert("원본 길이를 선택해주세요."); return; }
+
             const baseRow = DB.p1.find(r => r.label === rawKey);
             if (baseRow?.base_price === "문의 필요") { document.getElementById('totalText').textContent = "문의 필요"; return; }
+
             const priceRow = DB.p2.find(r => r.package === pkg && (pkg === 'economy' ? true : r.edit_point === editPoint));
+            
             let basePrice = parseInt(baseRow?.base_price) || 0;
             let minPrice = parseInt(priceRow?.price_per_min) || 0;
+
             let total = basePrice + (minPrice * finalMin);
+
             const momentDef = DB.p3.find(d => d.label === '시점 추가');
             total += (momentCnt * (parseInt(momentDef?.value) || 30000));
+
             const collabDef = DB.p3.find(d => d.label === '합방 인원 추가');
-            if (collabCnt >= 4) { total += (finalMin * (parseInt(collabDef?.value) || 2000) * (collabCnt - 3)); }
+            if (collabCnt >= 4) {
+                total += (finalMin * (parseInt(collabDef?.value) || 2000) * (collabCnt - 3));
+            }
+
             let multipliers = 1;
             const activeChips = document.querySelectorAll('#extraToggles .chip.is-active');
             activeChips.forEach(chip => {
                 const def = DB.p3.find(d => d.label === chip.dataset.extra);
                 if (def && def.type === 'mult') multipliers += (parseFloat(def.value) - 1);
             });
+
             total *= multipliers;
             document.getElementById('totalText').textContent = Math.round(total).toLocaleString() + "원";
             sendHeight();
@@ -356,17 +344,22 @@
                 if (e.target.dataset.group === 'rush') {
                     document.querySelectorAll('[data-group="rush"]').forEach(c => c.classList.remove('is-active'));
                 }
-                if (!wasActive) { e.target.classList.add('is-active'); }
-                else if (e.target.dataset.group !== 'rush') { e.target.classList.remove('is-active'); }
+                if (!wasActive) {
+                    e.target.classList.add('is-active');
+                } else if (e.target.dataset.group !== 'rush') {
+                    e.target.classList.remove('is-active');
+                }
                 document.getElementById('totalText').textContent = "0원";
             }
         });
 
+        // [수정된 복사 로직] 화면 튕김(스크롤 점프) 방지 적용
         document.getElementById('btnCopyForm').addEventListener('click', (e) => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
             const pkgLabel = document.getElementById('package').options[document.getElementById('package').selectedIndex].text;
             const editPoint = document.getElementById('editPoint').options[document.getElementById('editPoint').selectedIndex].text;
+            
             const activeExtras = Array.from(document.querySelectorAll('#extraToggles .chip.is-active')).map(c => c.textContent);
             const extraStr = activeExtras.length > 0 ? activeExtras.join(', ') : "없음";
 
@@ -385,13 +378,19 @@
 
 - 예상 총액: ${document.getElementById('totalText').textContent}`;
 
+            // --- 스크롤 방지 복사 처리 ---
             const textArea = document.createElement("textarea");
             textArea.value = copyTemplate;
+            
+            // 현재 스크롤 위치를 구해서 해당 위치에 textarea를 생성 (위로 튕기는 것 방지)
             const yPos = window.pageYOffset || document.documentElement.scrollTop;
             textArea.style.position = "absolute";
             textArea.style.left = "-9999px";
             textArea.style.top = yPos + "px"; 
+            
             document.body.appendChild(textArea);
+            
+            // 포커스를 주되, 스크롤이 이동하지 않도록 옵션 추가
             textArea.focus({ preventScroll: true });
             textArea.select();
             textArea.setSelectionRange(0, 99999);
@@ -417,6 +416,7 @@
         });
 
         window.addEventListener('resize', sendHeight);
+        setInterval(sendHeight, 1000);
         loadData();
     </script>
 </body>
