@@ -33,10 +33,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        html, body {
-            touch-action: pan-y;
-            overflow: hidden;
-        }
+        html { overflow: hidden; }
 
         body {
             background: transparent;
@@ -262,26 +259,34 @@
             window.parent.postMessage({ height: height }, '*');
         }
 
-        // ===================== 터치 스크롤 부모 위임 처리 =====================
+        // ===================== 터치 스크롤 포커스 해제 처리 =====================
+        // 원리: 손가락이 실제로 세로로 움직일 때만 blur → 탭/클릭은 전혀 영향 없음
 
         var _touchStartY = 0;
         var _touchStartX = 0;
+        var _blurFired = false;
 
         document.addEventListener('touchstart', function(e) {
             _touchStartY = e.touches[0].clientY;
             _touchStartX = e.touches[0].clientX;
+            _blurFired = false;
         }, { passive: true });
 
         document.addEventListener('touchmove', function(e) {
+            if (_blurFired) return; // 한 번만 실행
             var dy = Math.abs(e.touches[0].clientY - _touchStartY);
             var dx = Math.abs(e.touches[0].clientX - _touchStartX);
-
-            // 세로 이동이 가로보다 크고 5px 이상 → 스크롤로 판단, 그때만 포커스 해제
-            if (dy > dx && dy > 5) {
+            // 세로 이동 10px 이상 + 세로 > 가로 → 스크롤로 확정 판단
+            if (dy > 10 && dy > dx) {
+                _blurFired = true;
                 var active = document.activeElement;
-                if (active && active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
-                    try { active.blur(); window.blur(); } catch(err) {}
+                if (active && active !== document.body) {
+                    // INPUT, TEXTAREA는 키보드 유지 (사용자가 타이핑 중일 수 있음)
+                    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
+                        try { active.blur(); } catch(err) {}
+                    }
                 }
+                try { window.blur(); } catch(err) {}
             }
         }, { passive: true });
 
