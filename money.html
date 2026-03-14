@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>현서이님-견적 계산기</title>
 
     <style>
@@ -32,12 +32,13 @@
             --unified-width: 140px;
         }
 
+        /* [핵심 수정] 모든 스크롤 잠금 요소 해제 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* [중요 수정] 스크롤 가두기 방지 */
         html { 
-            overflow: visible; /* hidden 제거: 부모 페이지 스크롤 허용 */
-            height: auto; 
+            /* 스크롤 가두기 방지: 높이를 고정하지 않고 넘침을 허용함 */
+            overflow: visible !important; 
+            height: auto !important; 
         } 
         body {
             background: transparent;
@@ -46,13 +47,14 @@
             padding: 15px 10px;
             line-height: 1.5;
             word-break: keep-all;
-            overflow: visible;
-            /* 모바일에서 수직 스크롤(pan-y)을 부모에게 즉시 전달하도록 설정 */
-            touch-action: pan-y; 
+            /* 모바일에서 스크롤 주도권을 부모 페이지에 즉시 넘기도록 설정 */
+            overflow: visible !important;
+            height: auto !important;
+            touch-action: auto !important; 
             -webkit-overflow-scrolling: touch;
         }
 
-        .mainWrap { max-width: 845px; margin: 0 auto; }
+        .mainWrap { max-width: 845px; margin: 0 auto; position: relative; }
         .sec { margin-bottom: 50px; width: 100%; }
 
         .statusTitlePill {
@@ -260,8 +262,9 @@
     </div>
 
     <script>
+        // 높이 전송 (부모에서 아이프레임 길이를 맞추기 위해 필수)
         function sendHeight() {
-            const height = document.body.scrollHeight || document.documentElement.scrollHeight;
+            const height = document.body.offsetHeight || document.body.scrollHeight;
             window.parent.postMessage({ height: height }, '*');
         }
 
@@ -312,32 +315,22 @@
             const collabCnt = parseInt(document.getElementById('collabVal').value) || 0;
 
             if (!rawKey) { alert("원본 길이를 선택해주세요."); return; }
-
             const baseRow = DB.p1.find(r => r.label === rawKey);
             if (baseRow?.base_price === "문의 필요") { document.getElementById('totalText').textContent = "문의 필요"; return; }
-
             const priceRow = DB.p2.find(r => r.package === pkg && (pkg === 'economy' ? true : r.edit_point === editPoint));
-            
             let basePrice = parseInt(baseRow?.base_price) || 0;
             let minPrice = parseInt(priceRow?.price_per_min) || 0;
-
             let total = basePrice + (minPrice * finalMin);
-
             const momentDef = DB.p3.find(d => d.label === '시점 추가');
             total += (momentCnt * (parseInt(momentDef?.value) || 30000));
-
             const collabDef = DB.p3.find(d => d.label === '합방 인원 추가');
-            if (collabCnt >= 4) {
-                total += (finalMin * (parseInt(collabDef?.value) || 2000) * (collabCnt - 3));
-            }
-
+            if (collabCnt >= 4) { total += (finalMin * (parseInt(collabDef?.value) || 2000) * (collabCnt - 3)); }
             let multipliers = 1;
             const activeChips = document.querySelectorAll('#extraToggles .chip.is-active');
             activeChips.forEach(chip => {
                 const def = DB.p3.find(d => d.label === chip.dataset.extra);
                 if (def && def.type === 'mult') multipliers += (parseFloat(def.value) - 1);
             });
-
             total *= multipliers;
             document.getElementById('totalText').textContent = Math.round(total).toLocaleString() + "원";
             sendHeight();
@@ -351,21 +344,18 @@
                 if (e.target.dataset.group === 'rush') {
                     document.querySelectorAll('[data-group="rush"]').forEach(c => c.classList.remove('is-active'));
                 }
-                if (!wasActive) {
-                    e.target.classList.add('is-active');
-                } else if (e.target.dataset.group !== 'rush') {
-                    e.target.classList.remove('is-active');
-                }
+                if (!wasActive) { e.target.classList.add('is-active'); }
+                else if (e.target.dataset.group !== 'rush') { e.target.classList.remove('is-active'); }
                 document.getElementById('totalText').textContent = "0원";
             }
         });
 
+        // 복사 로직 (스크롤 튕김 방지 유지)
         document.getElementById('btnCopyForm').addEventListener('click', (e) => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
             const pkgLabel = document.getElementById('package').options[document.getElementById('package').selectedIndex].text;
             const editPoint = document.getElementById('editPoint').options[document.getElementById('editPoint').selectedIndex].text;
-            
             const activeExtras = Array.from(document.querySelectorAll('#extraToggles .chip.is-active')).map(c => c.textContent);
             const extraStr = activeExtras.length > 0 ? activeExtras.join(', ') : "없음";
 
