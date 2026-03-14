@@ -33,9 +33,9 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ✅ 수정: html overflow: hidden 제거 → 부모 페이지 스크롤 막는 원인 */
-        html {
-            touch-action: pan-y; /* ✅ 추가: 세로 스크롤을 부모에게 전달 */
+        html, body {
+            touch-action: pan-y;
+            overflow: hidden;
         }
 
         body {
@@ -46,7 +46,6 @@
             line-height: 1.5;
             word-break: keep-all;
             overflow-x: hidden;
-            touch-action: pan-y; /* ✅ 추가 */
         }
 
         .mainWrap { max-width: 845px; margin: 0 auto; }
@@ -263,49 +262,43 @@
             window.parent.postMessage({ height: height }, '*');
         }
 
-        // ✅ 핵심 수정: iframe 포커스를 주기적으로 부모에게 반환
-        // 사용자가 input/select/textarea를 조작 중이 아닐 때만 포커스 해제
-        function releaseIframeFocus() {
-            const active = document.activeElement;
-            const isInteracting = active &&
-                (active.tagName === 'INPUT' ||
-                 active.tagName === 'SELECT' ||
-                 active.tagName === 'TEXTAREA' ||
-                 active.tagName === 'BUTTON');
+        // ===================== 터치 스크롤 부모 위임 처리 =====================
 
-            if (!isInteracting && window.parent !== window) {
-                try {
-                    active && active.blur();
-                    window.blur();
-                } catch(e) {}
-            }
+        function isInteractiveElement(el) {
+            if (!el) return false;
+            const tag = el.tagName;
+            return tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON';
         }
 
-        // ✅ 터치 이벤트를 부모 페이지로 전달 (스크롤 복구)
-        let lastTouchY = 0;
+        // 터치 시작 시: input/select 등 조작 중이 아니면 즉시 blur → 부모로 포커스 반환
         document.addEventListener('touchstart', function(e) {
-            lastTouchY = e.touches[0].clientY;
+            if (!isInteractiveElement(e.target)) {
+                if (document.activeElement) document.activeElement.blur();
+                try { window.blur(); } catch(e) {}
+            }
+        }, { passive: true });
+
+        // 터치 이동 시: 부모 페이지에 스크롤 위임 메시지 전송
+        let _lastY = 0;
+        document.addEventListener('touchstart', function(e) {
+            _lastY = e.touches[0].clientY;
         }, { passive: true });
 
         document.addEventListener('touchmove', function(e) {
-            const active = document.activeElement;
-            const isInteracting = active &&
-                (active.tagName === 'INPUT' ||
-                 active.tagName === 'SELECT' ||
-                 active.tagName === 'TEXTAREA');
-
-            // 인터랙티브 요소 사용 중이 아니면 부모로 스크롤 위임
-            if (!isInteracting) {
-                window.parent.postMessage({
-                    type: 'touchmove',
-                    deltaY: lastTouchY - e.touches[0].clientY
-                }, '*');
+            if (!isInteractiveElement(e.target)) {
+                const delta = _lastY - e.touches[0].clientY;
+                window.parent.postMessage({ type: 'scroll', deltaY: delta }, '*');
             }
-            lastTouchY = e.touches[0].clientY;
+            _lastY = e.touches[0].clientY;
         }, { passive: true });
 
-        // ✅ 1.5초마다 포커스 해제 (2초 뒤 스크롤 막히는 현상 방지)
-        setInterval(releaseIframeFocus, 1500);
+        // 주기적 포커스 해제: input 등 사용 안 할 때 500ms마다 blur
+        setInterval(function() {
+            const active = document.activeElement;
+            if (!isInteractiveElement(active)) {
+                try { if (active) active.blur(); window.blur(); } catch(e) {}
+            }
+        }, 500);
 
         // ===================== 이하 기존 로직 동일 =====================
 
