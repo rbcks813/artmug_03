@@ -357,15 +357,28 @@
 
         document.getElementById('calcBtn').addEventListener('click', calculate);
 
+        // --- 수정된 부분: 칩(Chip) 토글 로직 ---
         document.getElementById('extraToggles').addEventListener('click', (e) => {
             if (e.target.classList.contains('chip')) {
+                const wasActive = e.target.classList.contains('is-active');
+                
+                // 마감 그룹인 경우 다른 옵션들을 먼저 해제
                 if (e.target.dataset.group === 'rush') {
                     document.querySelectorAll('[data-group="rush"]').forEach(c => c.classList.remove('is-active'));
                 }
-                e.target.classList.toggle('is-active');
+                
+                // 클릭한 항목이 이전에 활성화 상태가 아니었을 때만 활성화 (이미 활성화였다면 위의 remove로 해제됨)
+                if (!wasActive) {
+                    e.target.classList.add('is-active');
+                } else if (e.target.dataset.group !== 'rush') {
+                    // 마감 그룹이 아닌 일반 칩(포트폴리오 등)은 일반적인 토글 처리
+                    e.target.classList.remove('is-active');
+                }
+
                 document.getElementById('totalText').textContent = "0원";
             }
         });
+        // ------------------------------------
 
         document.getElementById('btnCopyForm').addEventListener('click', () => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
