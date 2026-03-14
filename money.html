@@ -378,9 +378,10 @@
                 document.getElementById('totalText').textContent = "0원";
             }
         });
-        // ------------------------------------
 
+        // --- 수정된 부분: Armor-Copy-Logic 적용 (모바일 호환 복사) ---
         document.getElementById('btnCopyForm').addEventListener('click', () => {
+            const n = String.fromCharCode(10); // 줄바꿈 정의
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
             const pkgLabel = document.getElementById('package').options[document.getElementById('package').selectedIndex].text;
@@ -388,27 +389,47 @@
             
             const activeExtras = Array.from(document.querySelectorAll('#extraToggles .chip.is-active')).map(c => c.textContent);
             const extraStr = activeExtras.length > 0 ? activeExtras.join(', ') : "없음";
+            const total = document.getElementById('totalText').textContent;
 
-            const copyTemplate = `[문의 양식]
-- 원본 영상 길이: ${rawLabel}
-- 희망 영상 길이: ${finalMin}분
-- 희망 타입: ${pkgLabel}
-- 편집점: ${editPoint}
-- 추가 옵션: ${extraStr}
-- 시점: ${document.getElementById('momentVal').value}개
-- 합방 인원: ${parseInt(document.getElementById('collabVal').value) + 1}명
-- 유튜브 채널 링크: ${document.getElementById('fChannel').value}
-- 원본 영상 공유: ${document.getElementById('fFinalLen').value}
-- 영상 콘셉트 및 레퍼런스 자료: ${document.getElementById('fConcept').value}
-- 그 외 요구사항: ${document.getElementById('fEtc').value}
+            const copyTemplate = "[문의 양식]" + n +
+                "- 원본 영상 길이: " + rawLabel + n +
+                "- 희망 영상 길이: " + finalMin + "분" + n +
+                "- 희망 타입: " + pkgLabel + n +
+                "- 편집점: " + editPoint + n +
+                "- 추가 옵션: " + extraStr + n +
+                "- 시점: " + document.getElementById('momentVal').value + "개" + n +
+                "- 합방 인원: " + (parseInt(document.getElementById('collabVal').value) + 1) + "명" + n +
+                "- 유튜브 채널 링크: " + document.getElementById('fChannel').value + n +
+                "- 원본 영상 공유: " + document.getElementById('fFinalLen').value + n +
+                "- 영상 콘셉트 및 레퍼런스 자료: " + document.getElementById('fConcept').value + n +
+                "- 그 외 요구사항: " + document.getElementById('fEtc').value + n + n +
+                "- 예상 총액: " + total;
 
-- 예상 총액: ${document.getElementById('totalText').textContent}`;
+            const e = document.createElement('textarea');
+            e.value = copyTemplate;
+            e.style.position = 'fixed';
+            e.style.left = '-9999px';
+            e.style.top = '0';
+            document.body.appendChild(e);
+            
+            e.focus();
+            e.select();
+            e.setSelectionRange(0, 99999); // iOS 대응
 
-            navigator.clipboard.writeText(copyTemplate).then(() => {
+            try {
+                const successful = document.execCommand('copy');
                 const toast = document.getElementById('formToast');
-                toast.textContent = "복사 완료! 그대로 붙여넣으시면 됩니다.";
+                if (successful) {
+                    toast.textContent = "복사가 완료되었습니다!";
+                } else {
+                    toast.textContent = "복사할 수 없습니다.";
+                }
                 setTimeout(() => toast.textContent = "", 3000);
-            });
+            } catch (err) {
+                document.getElementById('formToast').textContent = "복사할 수 없습니다.";
+            }
+            
+            document.body.removeChild(e);
         });
 
         document.getElementById('btnResetForm').addEventListener('click', () => {
