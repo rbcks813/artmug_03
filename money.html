@@ -126,6 +126,12 @@
             padding: 14px; font-family: 'Cafe24Surround', sans-serif; font-size: 14px;
         }
         .formTextarea { resize: none; overflow-y: auto; }
+        
+        /* placeholder 색상 조절 (선택사항) */
+        .formTextarea::placeholder {
+            color: #b0a396;
+            line-height: 1.6;
+        }
 
         .formActions { display: flex; gap: 10px; margin-top: 15px; }
         .formBtn { flex: 1; height: 50px; border: none; border-radius: 12px; cursor: pointer; font-family: 'Cafe24Surround'; font-size: 16px; }
@@ -236,11 +242,11 @@
                     </div>
                     <div class="formItem formItem--full">
                         <label class="formLabel">영상 콘셉트 및 레퍼런스 자료</label>
-                        <textarea class="formTextarea" id="fConcept" rows="5"></textarea>
+                        <textarea class="formTextarea" id="fConcept" rows="5" placeholder="해당 내용은 자세할수록 작업에 큰 도움이 됩니다. &#10;레퍼런스 자료가 없는 경우, 원하시는 영상 스타일의 링크로 대체하시거나 &#10;제 포트폴리오 중에서 선택해 주셔도 괜찮습니다."></textarea>
                     </div>
                     <div class="formItem formItem--full">
                         <label class="formLabel">그 외 요구사항</label>
-                        <textarea class="formTextarea" id="fEtc" rows="4"></textarea>
+                        <textarea class="formTextarea" id="fEtc" rows="4" placeholder="추가로 전달하고 싶은 내용이 있다면 자유롭게 작성해주세요."></textarea>
                     </div>
                 </div>
                 <div class="formActions">
@@ -353,7 +359,6 @@
             }
         });
 
-        // [수정된 복사 로직] 화면 튕김(스크롤 점프) 방지 적용
         document.getElementById('btnCopyForm').addEventListener('click', (e) => {
             const rawLabel = document.getElementById('rawMin').value || "구간 선택";
             const finalMin = document.getElementById('finalMin').value || "0";
@@ -378,11 +383,9 @@
 
 - 예상 총액: ${document.getElementById('totalText').textContent}`;
 
-            // --- 스크롤 방지 복사 처리 ---
             const textArea = document.createElement("textarea");
             textArea.value = copyTemplate;
             
-            // 현재 스크롤 위치를 구해서 해당 위치에 textarea를 생성 (위로 튕기는 것 방지)
             const yPos = window.pageYOffset || document.documentElement.scrollTop;
             textArea.style.position = "absolute";
             textArea.style.left = "-9999px";
@@ -390,7 +393,6 @@
             
             document.body.appendChild(textArea);
             
-            // 포커스를 주되, 스크롤이 이동하지 않도록 옵션 추가
             textArea.focus({ preventScroll: true });
             textArea.select();
             textArea.setSelectionRange(0, 99999);
