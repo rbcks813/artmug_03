@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Armor-Portfolio-V2-Final</title>
+<title>Armor-Portfolio-V2-Final-Sheet-Linked</title>
 <style>
 /* [Rule 0] 스타일 격리 */
 :root {
@@ -18,7 +18,6 @@ body {
     font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
     background: transparent; 
     overflow-x: hidden;
-    /* 하단 빈공간 방지를 위해 높이를 유연하게 설정 */
     height: auto;
     min-height: auto;
 }
@@ -52,12 +51,10 @@ section[data-type][data-active="true"] { display: block; }
     all: initial; box-sizing: border-box; display: flex; align-items: center; justify-content: center; flex-direction: column;
     background: #fff; border-radius: 16px; padding: 22px;
     box-shadow: 0 8px 30px rgba(20,20,40,0.08); 
-    /* 중요: 하단 마진을 0으로 변경하여 밀어냄 방지 */
     margin: 10px auto 0px; 
     font-family: inherit; width: 100%;
 }
 
-/* [PC 디자인 복구] 스테이지 배경을 밝게 수정 */
 .stage {
     position: relative; width: 100%; height: 560px;
     background: #eeeeee; 
@@ -73,7 +70,6 @@ section[data-type][data-active="true"] { display: block; }
 }
 .slide[data-active="true"] { opacity: 1; pointer-events: auto; transform: translateX(0); }
 
-/* [PC 영상 크기] 80% 유지 */
 .slide iframe {
     width: 80%; max-width: 880px; aspect-ratio: 16 / 9;
     border: 0; border-radius: 8px; background: #000;
@@ -91,7 +87,6 @@ section[data-type][data-active="true"] { display: block; }
 .arrow-prev { left: 15px; }
 .arrow-next { right: 15px; }
 
-/* 태그 정렬 */
 .tag-container { margin-top: 24px; display: flex; justify-content: center; width: 100%; }
 .tag-group { display: none; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .tag-group[data-active="true"] { display: flex; }
@@ -114,7 +109,6 @@ section[data-type][data-active="true"] { display: block; }
 .thumb-btn[data-active="true"] { border-color: var(--main-color); transform: translateY(-4px); }
 .thumb-btn img { width: 100%; height: 100%; object-fit: cover; }
 
-/* [모바일 최적화 미디어 쿼리] */
 @media (max-width: 768px) {
     .nav-wrap { gap: 6px; margin: 10px auto; }
     .nav-wrap button { font-size: 13px; flex: 1 1 calc(33.333% - 10px); height: 42px; }
@@ -135,115 +129,82 @@ section[data-type][data-active="true"] { display: block; }
 <div id="type-container"></div>
 
 <script>
-const videoData = {
-    A: { title: "로블록스", list: [
-        { id: "OrKo9rCpblo", tags: ["#프리미엄", "#로블록스", "#99 Nights"] },
-        { id: "_96YcJY-vtQ", tags: ["#프리미엄", "#로블록스", "#편집"] },
-        { id: "02Wv5e81HLU", tags: ["#디럭스", "#로블록스", "#모양몬"] },
-        { id: "D8wdZRJNbf8", tags: ["#디럭스", "#로블록스", "#숲속"] },
-        { id: "aF9mAzdOHmM", tags: ["#디럭스", "#로블록스", "#편집"] },
-        { id: "d1F9zWoxJCY", tags: ["#디럭스", "#로블록스", "#꽥"] },
-        { id: "rogxyO71TzA", tags: ["#디럭스", "#로블록스", "#RIVALS"] },
-        { id: "TdN2jdv9TnU", tags: ["#디럭스", "#로블록스", "#모양몬"] },
-        { id: "HJ9xXzAH7Ek", tags: ["#디럭스", "#로블록스", "#숲속"] },
-        { id: "wfgSubK0l2U", tags: ["#디럭스", "#로블록스", "#RIVALS"] },
-        { id: "daHC4H3BSMk", tags: ["#디럭스", "#로블록스", "#꽥"] },
-        { id: "2kgiSs7UA7w", tags: ["#디럭스", "#로블록스", "#월홉타워"] },
-        { id: "1WqinR5ZFBs", tags: ["#디럭스", "#로블록스", "#모양몬"] },
-        { id: "W-AHtpFJGCU", tags: ["#디럭스", "#로블록스", "#월홉타워"] }
-    ]},
-    B: { title: "그 외 게임", list: [
-        { id: "5U90ixKicUM", tags: ["#프리미엄", "#발로란트", "#핑맨"] },
-        { id: "pDdUdu1D4k8", tags: ["#프리미엄", "#피망맞고", "#눈꽃"] },
-        { id: "H3U7hzk-MWs", tags: ["#프리미엄", "#해리포터", "#눈꽃"] },
-        { id: "PYr7AS76MOQ", tags: ["#프리미엄", "#EggyParty", "#꽥"] },
-        { id: "VcLxk7XQnEQ", tags: ["#디럭스", "#마인크래프트", "#식스리"] },
-        { id: "-aqF-ADfusg", tags: ["#디럭스", "#마크", "#루태"] },
-        { id: "6h4tYC6pTvs", tags: ["#디럭스", "#마크", "#루태"] },
-        { id: "RTIFAUXVIBc", tags: ["#디럭스", "#마크", "#루태"] },
-        { id: "UP7e_SnQrq4", tags: ["#디럭스", "#메이플", "#식스리"] },
-        { id: "ROOMgOsn6i8", tags: ["#디럭스", "#메이플", "#식스리"] },
-        { id: "_QFbrSX0PEU", tags: ["#디럭스", "#메이플", "#식스리"] },
-        { id: "PO4caili8Qs", tags: ["#디럭스", "#메이플", "#식스리"] },
-        { id: "vU9d17IVOII", tags: ["#디럭스", "#메이플", "#밍몬"] },
-        { id: "mCFbP4_fTLQ", tags: ["#디럭스", "#메이플", "#밍몬"] },
-        { id: "apZ-Sd4VCr0", tags: ["#디럭스", "#메이플", "#화로"] },
-        { id: "uRK_0M9ublA", tags: ["#디럭스", "#메이플", "#화로"] },
-        { id: "Rz4XH9LVTLA", tags: ["#디럭스", "#로아", "#식스리"] },
-        { id: "fvt_i2AnXqY", tags: ["#디럭스", "#로아", "#식스리"] },
-        { id: "lJeSYyVcC_s", tags: ["#디럭스", "#로아", "#식스리"] },
-        { id: "Qt-iZsZblq8", tags: ["#디럭스", "#로아", "#식스리"] },
-        { id: "ub_pklRrYLs", tags: ["#디럭스", "#Museum", "#붉은새"] },
-        { id: "a-SSq-QFggQ", tags: ["#디럭스", "#Prison", "#붉은새"] },
-        { id: "9zJo-cAX0_c", tags: ["#디럭스", "#Victoria3", "#붉은새"] },
-        { id: "oHVVlikO6u8", tags: ["#디럭스", "#Victoria3", "#붉은새"] },
-        { id: "MI_fffbHMQg", tags: ["#프리미엄", "#호그와트", "#인휘"] },
-        { id: "re49_WQTEO8", tags: ["#디럭스", "#WorldBox", "#루태"] },
-        { id: "v11ICL9ei0E", tags: ["#디럭스", "#어몽어스", "#루태"] },
-        { id: "dbX9OmRLvXM", tags: ["#디럭스", "#MakeChoice", "#히게"] }
-    ]},
-    C: { title: "저스트 채팅", list: [
-        { id: "Xsy29TUcnck", tags: ["#디럭스", "#버츄얼", "#매맴찌"] },
-        { id: "lIKV5H2VVBU", tags: ["#디럭스", "#저챗", "#위즐리어카"] },
-        { id: "2X-pgPT74AM", tags: ["#디럭스", "#리뷰", "#참외몬"] },
-        { id: "GwVtIRJVQWw", tags: ["#디럭스", "#저챗", "#설권"] },
-        { id: "T2HgnXpY53o", tags: ["#디럭스", "#먹방", "#식스리"] },
-        { id: "zygZ60-kifc", tags: ["#디럭스", "#상담", "#식스리"] },
-        { id: "yXSnNJPJ-I0", tags: ["#디럭스", "#저챗", "#식스리"] },
-        { id: "F58pFvbnGuE", tags: ["#디럭스", "#월드컵", "#루태"] },
-        { id: "eYzTvddNNbg", tags: ["#디럭스", "#저챗", "#루태"] },
-        { id: "30EOypjEbqg", tags: ["#디럭스", "#저챗", "#유메"] },
-        { id: "BAGKATNWG-I", tags: ["#디럭스", "#저챗", "#루태"] },
-        { id: "LCqp-6-gjks", tags: ["#디럭스", "#먹방", "#루태"] }
-    ]},
-    D: { title: "정보 전달", list: [
-        { id: "iCrzafsi0Yg", tags: ["#디럭스", "#강의", "#Meter"] },
-        { id: "mNCjhKfXRFE", tags: ["#디럭스", "#강의", "#Koyu"] },
-        { id: "gxCJlPIaj9s", tags: ["#스탠다드", "#강의", "#Ann"] },
-        { id: "USuumjIrFkI", tags: ["#스탠다드", "#강의", "#Ann"] },
-        { id: "iaYpTEB_1hg", tags: ["#스탠다드", "#강의", "#Ann"] },
-        { id: "st2NikeDXn8", tags: ["#프리미엄", "#강의", "#Ann"] },
-        { id: "TaWPBUNRO_M", tags: ["#프리미엄", "자기소개", "#구슬요"] },
-        { id: "1hTaopRwBCI", tags: ["#프리미엄", "자기소개", "#김병살"] },
-        { id: "wAQRlh_Qbf0", tags: ["#프리미엄", "자기소개", "#아드리챔"] },
-        { id: "2t2veS4xtKk", tags: ["#프리미엄", "자기소개", "#해리"] },
-        { id: "sOM-2htWnnc", tags: ["#프리미엄", "자기소개", "#지야"] },
-        { id: "QSLZIXwoPBA", tags: ["#프리미엄", "자기소개", "#비에타"] },
-        { id: "G6Gk4D7z3ng", tags: ["#프리미엄", "자기소개", "#감자가비"] },
-        { id: "3mBV8pad0pY", tags: ["#프리미엄", "자기소개", "#구나구나"] },
-        { id: "8FwgfblX_0k", tags: ["#프리미엄", "자기소개", "#포도당"] },
-        { id: "DbOgK2rl7bk", tags: ["#디럭스", "#공지", "#꽥"] },
-        { id: "DV_StHWFBGw", tags: ["#디럭스", "#업데이트", "#루태"] },
-        { id: "23F7LBPGoOk", tags: ["#디럭스", "#업데이트", "#루태"] }
-    ]},
-    E: { title: "V-log", list: [
-        { id: "85YkiiiYaac", tags: ["#디럭스", "#V-log", "#모양몬"] },
-        { id: "lMTp5xt7q9Q", tags: ["#디럭스", "#V-log", "#모양몬"] },
-        { id: "-39LQ3TTOOg", tags: ["#디럭스", "#V-log", "#꽥"] },
-        { id: "SImY2wcRYI4", tags: ["#디럭스", "#V-log", "#꽥"] },
-        { id: "OT4LUFNxEQI", tags: ["#디럭스", "#요리", "#루태"] },
-        { id: "0dSUkw9MfkE", tags: ["#디럭스", "#요리", "#루태"] },
-        { id: "x5Gr6SJD0BA", tags: ["#디럭스", "#요리", "#플로리안"] }
-    ]},
-    F: { title: "쇼츠", list: [
-        { id: "DzJiuIPNbyk", tags: ["#쇼츠", "#귀여움", "#쎄랑"] },
-        { id: "4pzZ8c8fhkE", tags: ["#쇼츠", "#귀여움", "#네무"] },
-        { id: "xpw_v-EKL_E", tags: ["#쇼츠", "#귀여움", "#네무"] },
-        { id: "gxqptoCFYgM", tags: ["#쇼츠", "#릴스", "#강주호"] },
-        { id: "BTbtQ9ecGFY", tags: ["#쇼츠", "#릴스", "#강주호"] },
-        { id: "rmRdsWCJS8U", tags: ["#쇼츠", "#릴스", "#미미"] },
-        { id: "8yePLqVkDD8", tags: ["#쇼츠", "#메이플", "#밍몬"] },
-        { id: "NNRn70lzpmM", tags: ["#쇼츠", "#메이플", "#밍몬"] },
-        { id: "AilEEWQW2zA", tags: ["#쇼츠", "#메이플", "#밍몬"] },
-        { id: "SS6VHaps6SI", tags: ["#쇼츠", "#페이셜", "#라로시"] }
-    ]},
-};
+// 구글 시트 CSV 링크
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=479425683&single=true&output=csv';
 
-function initApp() {
+// 허용된 카테고리 리스트 (순서 보장용)
+const ALLOWED_CATEGORIES = ["로블록스", "그 외 게임", "저스트채팅", "정보전달", "브이로그", "쇼츠"];
+
+async function fetchData() {
+    try {
+        const response = await fetch(SHEET_URL);
+        const data = await response.text();
+        return parseCSV(data);
+    } catch (error) {
+        console.error("데이터를 불러오는 중 오류 발생:", error);
+        return {};
+    }
+}
+
+function parseCSV(csvText) {
+    const lines = csvText.split('\n');
+    const videoData = {};
+    
+    // 허용된 카테고리 초기화
+    ALLOWED_CATEGORIES.forEach(cat => {
+        videoData[cat] = { title: cat, list: [] };
+    });
+
+    // 첫 번째 줄(헤더) 제외하고 순회
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        
+        // CSV 파싱 (쉼표 기준, 따옴표 안의 쉼표 처리)
+        const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if (columns.length < 3) continue;
+
+        let category = columns[0].replace(/"/g, '').trim();
+        const id = columns[1].replace(/"/g, '').trim();
+        const tagsRaw = columns[2].replace(/"/g, '').trim();
+
+        // 띄어쓰기 제거하고 매칭 확인
+        const matchedCategory = ALLOWED_CATEGORIES.find(
+            allowed => allowed.replace(/\s+/g, '') === category.replace(/\s+/g, '')
+        );
+
+        if (matchedCategory) {
+            // 태그를 콤마로 분리하고 각 요소 앞뒤 공백 제거
+            const tagList = tagsRaw.split(',').map(t => t.trim()).filter(t => t !== "");
+            
+            videoData[matchedCategory].list.push({
+                id: id,
+                tags: tagList
+            });
+        }
+    }
+
+    // 데이터가 없는 카테고리는 삭제
+    Object.keys(videoData).forEach(key => {
+        if (videoData[key].list.length === 0) {
+            delete videoData[key];
+        }
+    });
+
+    return videoData;
+}
+
+async function initApp() {
+    const videoData = await fetchData();
     const btnWrap = document.getElementById('type-btns');
     const container = document.getElementById('type-container');
 
-    Object.keys(videoData).forEach((key, idx) => {
+    const categories = Object.keys(videoData);
+    if (categories.length === 0) {
+        container.innerHTML = "<p style='text-align:center; padding:20px;'>불러올 데이터가 없습니다.</p>";
+        return;
+    }
+
+    categories.forEach((key, idx) => {
         const group = videoData[key];
         const btn = document.createElement('button');
         btn.innerText = group.title;
@@ -260,11 +221,11 @@ function initApp() {
         setupSliderLogic(sec);
     });
 
-    // 실시간 높이 감지: ResizeObserver 사용
     const ro = new ResizeObserver(() => {
         sendHeight();
     });
     ro.observe(document.body);
+    sendHeight();
 }
 
 function renderSlider(list, typeKey) {
@@ -317,10 +278,12 @@ function setupSliderLogic(sec) {
             });
         });
         const activeThumb = thumbs[current];
-        activeThumb.parentElement.scrollTo({
-            left: activeThumb.offsetLeft - (activeThumb.parentElement.offsetWidth / 2) + (activeThumb.offsetWidth / 2),
-            behavior: 'smooth'
-        });
+        if (activeThumb) {
+            activeThumb.parentElement.scrollTo({
+                left: activeThumb.offsetLeft - (activeThumb.parentElement.offsetWidth / 2) + (activeThumb.offsetWidth / 2),
+                behavior: 'smooth'
+            });
+        }
         sendHeight();
     };
 
@@ -328,8 +291,10 @@ function setupSliderLogic(sec) {
     sec.querySelector('.arrow-next').onclick = () => update(current + 1);
     thumbs.forEach((t, i) => t.onclick = () => update(i));
     
-    const firstIfr = slides[0].querySelector('iframe');
-    firstIfr.src = firstIfr.dataset.src;
+    if (slides.length > 0) {
+        const firstIfr = slides[0].querySelector('iframe');
+        firstIfr.src = firstIfr.dataset.src;
+    }
 }
 
 function switchCategory(key) {
@@ -339,19 +304,18 @@ function switchCategory(key) {
         s.dataset.active = isActive;
         if(isActive) {
             const firstIfr = s.querySelector('.slide[data-active="true"] iframe');
-            if(!firstIfr.src) firstIfr.src = firstIfr.dataset.src;
+            if(firstIfr && !firstIfr.src) firstIfr.src = firstIfr.dataset.src;
         }
     });
     sendHeight();
 }
 
 function sendHeight() {
-    // scrollHeight 대신 offsetHeight를 사용하여 실제 렌더링된 높이 측정
     const h = document.body.offsetHeight;
     window.parent.postMessage({ type: 'resize', height: h }, '*');
 }
 
-window.onload = () => { initApp(); sendHeight(); };
+window.onload = () => { initApp(); };
 </script>
 </body>
 </html>
