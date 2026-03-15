@@ -132,8 +132,8 @@ section[data-type][data-active="true"] { display: block; }
 // 구글 시트 CSV 링크
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH8jUVjx9wTBIhjeeMpSD1g3F_HFetxJ11UvBqk30U8XVYurBlovsadmXPhYsEaTh-fNeKZCSuLf1K/pub?gid=479425683&single=true&output=csv';
 
-// 허용된 카테고리 리스트 (순서 보장용)
-const ALLOWED_CATEGORIES = ["로블록스", "그 외 게임", "저스트채팅", "정보전달", "브이로그", "쇼츠"];
+// 허용된 카테고리 리스트 (버튼 표시 이름 및 순서)
+const ALLOWED_CATEGORIES = ["로블록스", "그 외 게임", "저스트 채팅", "정보전달", "브이로그", "쇼츠"];
 
 async function fetchData() {
     try {
@@ -155,11 +155,9 @@ function parseCSV(csvText) {
         videoData[cat] = { title: cat, list: [] };
     });
 
-    // 첫 번째 줄(헤더) 제외하고 순회
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
-        // CSV 파싱 (쉼표 기준, 따옴표 안의 쉼표 처리)
         const columns = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
         if (columns.length < 3) continue;
 
@@ -167,13 +165,15 @@ function parseCSV(csvText) {
         const id = columns[1].replace(/"/g, '').trim();
         const tagsRaw = columns[2].replace(/"/g, '').trim();
 
-        // 띄어쓰기 제거하고 매칭 확인
+        // [해결 2] V-log인 경우 브이로그로 변경
+        if (category === "V-log") category = "브이로그";
+
+        // [해결 3] 저스트 채팅 등 띄어쓰기 무관하게 매칭
         const matchedCategory = ALLOWED_CATEGORIES.find(
             allowed => allowed.replace(/\s+/g, '') === category.replace(/\s+/g, '')
         );
 
         if (matchedCategory) {
-            // 태그를 콤마로 분리하고 각 요소 앞뒤 공백 제거
             const tagList = tagsRaw.split(',').map(t => t.trim()).filter(t => t !== "");
             
             videoData[matchedCategory].list.push({
@@ -183,7 +183,7 @@ function parseCSV(csvText) {
         }
     }
 
-    // 데이터가 없는 카테고리는 삭제
+    // 데이터가 없는 카테고리는 버튼에서 제외
     Object.keys(videoData).forEach(key => {
         if (videoData[key].list.length === 0) {
             delete videoData[key];
@@ -234,11 +234,17 @@ function renderSlider(list, typeKey) {
             <iframe data-src="https://www.youtube.com/embed/${v.id}?enablejsapi=1&rel=0" allowfullscreen></iframe>
         </div>
     `).join('');
+
+    // [해결 1] 태그 앞에 # 붙이기
     const tags = list.map((v, i) => `
         <div class="tag-group" data-index="${i}" ${i===0?'data-active="true"':''}>
-            ${v.tags.map(t => `<span>${t}</span>`).join('')}
+            ${v.tags.map(t => {
+                const cleanTag = t.startsWith('#') ? t : '#' + t;
+                return `<span>${cleanTag}</span>`;
+            }).join('')}
         </div>
     `).join('');
+
     const thumbs = list.map((v, i) => `
         <button class="thumb-btn" data-index="${i}" ${i===0?'data-active="true"':''}>
             <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" loading="lazy">
