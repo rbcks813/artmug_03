@@ -127,9 +127,10 @@
         }
         .formTextarea { resize: none; overflow-y: auto; }
         
-        /* placeholder 색상 조절 (선택사항) */
-        .formTextarea::placeholder {
-            color: #b0a396;
+        /* PC에서 placeholder를 더 선명하게 보이게 함 */
+        .formTextarea::placeholder, .formInput::placeholder {
+            color: #9e8e7e !important;
+            opacity: 1;
             line-height: 1.6;
         }
 
@@ -259,6 +260,7 @@
     </div>
 
     <script>
+        /* (나머지 스크립트 로직은 이전과 동일하게 유지) */
         function sendHeight() {
             const height = document.body.scrollHeight || document.documentElement.scrollHeight;
             window.parent.postMessage({ height: height }, '*');
@@ -385,14 +387,11 @@
 
             const textArea = document.createElement("textarea");
             textArea.value = copyTemplate;
-            
             const yPos = window.pageYOffset || document.documentElement.scrollTop;
             textArea.style.position = "absolute";
             textArea.style.left = "-9999px";
             textArea.style.top = yPos + "px"; 
-            
             document.body.appendChild(textArea);
-            
             textArea.focus({ preventScroll: true });
             textArea.select();
             textArea.setSelectionRange(0, 99999);
@@ -402,9 +401,7 @@
                 const toast = document.getElementById('formToast');
                 toast.textContent = "복사 완료! 그대로 붙여넣으시면 됩니다.";
                 setTimeout(() => toast.textContent = "", 3000);
-            } catch (err) {
-                alert("복사에 실패했습니다.");
-            }
+            } catch (err) { alert("복사에 실패했습니다."); }
             document.body.removeChild(textArea);
         });
 
